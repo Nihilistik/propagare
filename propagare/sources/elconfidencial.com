@@ -9,9 +9,7 @@ Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 Regex magic keywords to extract data from: elconfidencial.com
 
 """
-art_url==href="(.+?)" class="art-tit-link
-art_url3==<a title="(.+?)" href="(.+?)" class="art-tit-link tit-color" data-title="
-art_url2==<a title="(.+?)" href="(.+?)" class="art-tit-link tit-color" data-title="(.+?)">
+art_url==href=["](.*?)["]
 art_author==<meta name="twitter:creator" content="(.+?)">
 art_time==<meta name="article:puclished_time" content="(.+?)">
 art_title==<meta property="og:title" content="(.+?)">
