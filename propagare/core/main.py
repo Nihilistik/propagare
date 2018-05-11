@@ -625,10 +625,12 @@ class Propagare(object):
                     f.close()
                     #print reply # nice to have this output for dev new modules
                     for r in regex: # extract specific keywords from news: time, author, url (+variations), title, description, body
-                        if ('art_url==' or 'art_url2==') in r:
+                        if 'art_url==' in r or 'art_url2==' in r:
                             art_url = r
                             regex_art_url = str(art_url.split(sep, 1)[1]) # regex magics (art_url)
-                            pattern_art_url = re.compile(regex_art_url)
+                            print(type(regex_art_url))
+                            pattern_art_url = re.compile('''<a[^>]+href=["](.*?)["][^>]*>.*?</a>''', re.DOTALL)
+                            print("After compile")
                         if 'art_author==' in r:
                             art_author = r
                             regex_art_author = str(art_author.split(sep, 1)[1]) # regex magics (art_author)
@@ -650,7 +652,8 @@ class Propagare(object):
                             regex_art_body = str(art_body.split(sep, 1)[1]) # regex magics (art_body)
                             pattern_art_body = re.compile(regex_art_body, re.MULTILINE)
                     try:
-                        art_url_found = re.findall(pattern_art_url, reply) # found art_url patterns on main page
+                        art_url_found = pattern_art_url.findall(reply) # found art_url patterns on main page
+                        print(art_url_found)
                         art_url_parsed = self.check_art_repetitions(n, art_url_found) # discard results previously stored
                     except:
                         art_url_parsed = []
