@@ -103,6 +103,8 @@ class Propagare(object):
             self.json_report = open('data/'+n+"/"+category+"/"+ID+"/"+ID+".json", "w")
         if "publico.es" in n:
             self.json_report = open('data/'+n+"/"+category+"/"+ID+"/"+ID+".json", "w")
+        if "elconfidencial.com" in n:
+            self.json_report = open('data/'+n+"/"+category+"/"+date+"/"+ID+"/"+ID+".json", "w")
 
     def format_content(self, body_complete):
         html_parser = html2text.HTML2Text()
@@ -627,33 +629,56 @@ class Propagare(object):
                     for r in regex: # extract specific keywords from news: time, author, url (+variations), title, description, body
                         if 'art_url==' in r or 'art_url2==' in r:
                             art_url = r
-                            regex_art_url = str(art_url.split(sep, 1)[1]) # regex magics (art_url)
-                            print(type(regex_art_url))
-                            pattern_art_url = re.compile('''<a[^>]+href=["](.*?)["][^>]*>.*?</a>''', re.DOTALL)
-                            print("After compile")
+                            if 'hardcoded' in art_url:
+                                if 'elconfidencial' in n:
+                                    pattern_art_url = re.compile('<a\\b(?=[^>]* class=\"[^\"]*(?<=[\" ])art-tit-link[\" ])(?=[^>]* href=\"([^\"]*))', re.DOTALL)
+                            else:
+                                # Usual way
+                                regex_art_url = str(art_url.split(sep, 1)[1])# regex magics (art_url)
+                                pattern_art_url = re.compile(regex_art_url, re.DOTALL)
                         if 'art_author==' in r:
                             art_author = r
-                            regex_art_author = str(art_author.split(sep, 1)[1]) # regex magics (art_author)
-                            pattern_art_author = re.compile(regex_art_author)
+                            if 'hardcoded' in art_author:
+                                if 'elconfidencial' in n:
+                                    pattern_art_author = re.compile('<meta name="twitter:creator" content="(.+?)"  />')
+                            else:
+                                regex_art_author = str(art_author.split(sep, 1)[1]) # regex magics (art_author)
+                                pattern_art_author = re.compile(regex_art_author)
                         if 'art_time==' in r:
                             art_time = r
-                            regex_art_time = str(art_time.split(sep, 1)[1]) # regex magics (art_time)
-                            pattern_art_time = re.compile(regex_art_time)
+                            if 'hardcoded' in art_author:
+                                if 'elconfidencial' in n:
+                                    pattern_art_time = re.compile('<meta name="article:published_time" content="(.+?)"  />')
+                                else:
+                                    regex_art_time = str(art_time.split(sep, 1)[1]) # regex magics (art_time)
+                                    pattern_art_time = re.compile(regex_art_time)
+
                         if 'art_title==' in r:
                             art_title = r
-                            regex_art_title = str(art_title.split(sep, 1)[1]) # regex magics (art_title)
-                            pattern_art_title = re.compile(regex_art_title)
+                            if 'hardcoded' in art_author:
+                                if 'elconfidencial' in n:
+                                    pattern_art_title = re.compile('<meta property="og:title" content="(.+?)"  />')
+                                else:
+                                    regex_art_title = str(art_title.split(sep, 1)[1]) # regex magics (art_title)
+                                    pattern_art_title = re.compile(regex_art_title)
                         if 'art_description==' in r:
                             art_description = r
-                            regex_art_description = str(art_description.split(sep, 1)[1]) # regex magics (art_description)
-                            pattern_art_description = re.compile(regex_art_description)
+                            if 'hardcoded' in art_author:
+                                if 'elconfidencial' in n:
+                                    pattern_art_description = re.compile('<meta property="og:description" content="(.+?)"  />')
+                                else:
+                                    regex_art_description = str(art_description.split(sep, 1)[1]) # regex magics (art_description)
+                                    pattern_art_description = re.compile(regex_art_description)
                         if 'art_body==' in r:
                             art_body = r
-                            regex_art_body = str(art_body.split(sep, 1)[1]) # regex magics (art_body)
-                            pattern_art_body = re.compile(regex_art_body, re.MULTILINE)
+                            if 'hardcoded' in art_author:
+                                if 'elconfidencial' in n:
+                                    pattern_art_body = re.compile('<p>(.+?)</p>')
+                                else:
+                                    regex_art_body = str(art_body.split(sep, 1)[1]) # regex magics (art_body)
+                                    pattern_art_body = re.compile(regex_art_body, re.MULTILINE)
                     try:
-                        art_url_found = pattern_art_url.findall(reply) # found art_url patterns on main page
-                        print(art_url_found)
+                        art_url_found = re.findall(pattern_art_url, reply) # found art_url patterns on main page
                         art_url_parsed = self.check_art_repetitions(n, art_url_found) # discard results previously stored
                     except:
                         art_url_parsed = []
@@ -668,12 +693,12 @@ class Propagare(object):
                         print "" # zen out
                         for a in art_url_parsed:
                             if "elconfidencial.com" in n:
-                                time.sleep(5)
-                                print(a)
                                 if '"' in a:
                                     a = str(a.split('"', 1)[0])
-                                    print(a)
-                                    time.sleep(5)
+                                if a.startswith('//'):
+                                    a = 'https:' + a
+                                elif a.startswith('/'):
+                                    a = 'https://elconfidencial.com' + a
                             if "www.publico.es" in n:
                                 if '">' in a:
                                     a = str(a.split('"', 1)[0])
@@ -763,6 +788,13 @@ class Propagare(object):
                                                 regex_art_body = str(art_body.split(sep, 1)[1])
                                                 pattern_art_body = re.compile(regex_art_body)
                                         art_url_body_found = re.findall(pattern_art_body, reply_art)
+
+                                print("art_url_time_found: {0}".format(art_url_time_found))
+                                print("art_url_author_found: {0}".format(art_url_author_found))
+                                print("art_url_title_found: {0}".format(art_url_title_found))
+                                print("art_url_description_found: {0}".format(art_url_description_found))
+                                print("art_url_body_found: {0}".format(len(art_url_body_found)))
+                                time.sleep(5)
                                 time.sleep(0.1) # tic, tac!!!
                                 self.update_progress("\n      - ETA", num, len(art_url_list))
                                 print "" # zen out
@@ -812,7 +844,6 @@ class Propagare(object):
                                         self.generate_json(n, category, date, tag, ID) # generate .json
 
                                     if "publico.es" in a:
-                                        print(a_path)
                                         if len(a_path) == 5:
                                             category = a_path[3]
                                             ID = a_path[4]
@@ -827,6 +858,28 @@ class Propagare(object):
                                                 os.makedirs(path)
                                             path = path + '/'+n+'.txt'
                                             self.generate_json(n, '', None, None, '') # generate .json
+
+                                    if "elconfidencial.com" in a:
+                                        print(a_path)
+                                        if len(a_path) < 4:
+                                            continue
+                                        category = a_path[3]
+                                        if len(a_path) == 7:
+                                            date = a_path[4]
+                                            ID = a_path[5]
+                                        elif len(a_path) == 8:
+                                            category += '-' + a_path[4]
+                                            date = a_path[5]
+                                            ID = a_path[6]
+                                        elif len(a_path) == 9:
+                                            category += '-' + a_path[4] + a_path[5]
+                                            date = a_path[6]
+                                            ID = a_path[7]
+                                        path = 'data/' + n + '/' + category + '/' + date + '/' + ID
+                                        if not os.path.exists(path):
+                                            os.makedirs(path)
+                                        path += '/'+ID+'.txt'
+                                        self.generate_json(n, category, date, None, ID) # generate .json
 
                                     fs = open(path, "w") # generate .txt
                                     fs.write("Fuente: " + str(a).encode('utf-8') + "\n") # write source url
