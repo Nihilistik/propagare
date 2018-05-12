@@ -629,54 +629,54 @@ class Propagare(object):
                     for r in regex: # extract specific keywords from news: time, author, url (+variations), title, description, body
                         if 'art_url==' in r or 'art_url2==' in r:
                             art_url = r
+                            # Usual way
+                            regex_art_url = str(art_url.split(sep, 1)[1])# regex magics (art_url)
                             if 'hardcoded' in art_url:
                                 if 'elconfidencial' in n:
                                     pattern_art_url = re.compile('<a\\b(?=[^>]* class=\"[^\"]*(?<=[\" ])art-tit-link[\" ])(?=[^>]* href=\"([^\"]*))', re.DOTALL)
                             else:
-                                # Usual way
-                                regex_art_url = str(art_url.split(sep, 1)[1])# regex magics (art_url)
                                 pattern_art_url = re.compile(regex_art_url, re.DOTALL)
                         if 'art_author==' in r:
                             art_author = r
+                            regex_art_author = str(art_author.split(sep, 1)[1]) # regex magics (art_author)
                             if 'hardcoded' in art_author:
                                 if 'elconfidencial' in n:
                                     pattern_art_author = re.compile('<meta name="twitter:creator" content="(.+?)"  />')
                             else:
-                                regex_art_author = str(art_author.split(sep, 1)[1]) # regex magics (art_author)
                                 pattern_art_author = re.compile(regex_art_author)
                         if 'art_time==' in r:
                             art_time = r
+                            regex_art_time = str(art_time.split(sep, 1)[1]) # regex magics (art_time)
                             if 'hardcoded' in art_author:
                                 if 'elconfidencial' in n:
                                     pattern_art_time = re.compile('<meta name="article:published_time" content="(.+?)"  />')
-                                else:
-                                    regex_art_time = str(art_time.split(sep, 1)[1]) # regex magics (art_time)
-                                    pattern_art_time = re.compile(regex_art_time)
+                            else:
+                                pattern_art_time = re.compile(regex_art_time)
 
                         if 'art_title==' in r:
                             art_title = r
+                            regex_art_title = str(art_title.split(sep, 1)[1]) # regex magics (art_title)
                             if 'hardcoded' in art_author:
                                 if 'elconfidencial' in n:
                                     pattern_art_title = re.compile('<meta property="og:title" content="(.+?)"  />')
-                                else:
-                                    regex_art_title = str(art_title.split(sep, 1)[1]) # regex magics (art_title)
-                                    pattern_art_title = re.compile(regex_art_title)
+                            else:
+                                pattern_art_title = re.compile(regex_art_title)
                         if 'art_description==' in r:
                             art_description = r
+                            regex_art_description = str(art_description.split(sep, 1)[1]) # regex magics (art_description)
                             if 'hardcoded' in art_author:
                                 if 'elconfidencial' in n:
                                     pattern_art_description = re.compile('<meta property="og:description" content="(.+?)"  />')
-                                else:
-                                    regex_art_description = str(art_description.split(sep, 1)[1]) # regex magics (art_description)
-                                    pattern_art_description = re.compile(regex_art_description)
+                            else:
+                                pattern_art_description = re.compile(regex_art_description)
                         if 'art_body==' in r:
                             art_body = r
+                            regex_art_body = str(art_body.split(sep, 1)[1]) # regex magics (art_body)
                             if 'hardcoded' in art_author:
                                 if 'elconfidencial' in n:
                                     pattern_art_body = re.compile('<p>(.+?)</p>')
-                                else:
-                                    regex_art_body = str(art_body.split(sep, 1)[1]) # regex magics (art_body)
-                                    pattern_art_body = re.compile(regex_art_body, re.MULTILINE)
+                            else:
+                                pattern_art_body = re.compile(regex_art_body, re.MULTILINE)
                     try:
                         art_url_found = re.findall(pattern_art_url, reply) # found art_url patterns on main page
                         art_url_parsed = self.check_art_repetitions(n, art_url_found) # discard results previously stored
